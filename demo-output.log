@@ -1,0 +1,37 @@
+
+> agentic-revops@1.0.0 demo
+> tsx src/swarm/demo/SwarmDemo.ts
+
+🐝 Initializing Revenue Operations Swarm...
+
+👑 Queen Agent initialized
+🤖 Worker agents initialized:
+  - CRM Specialist
+  - Marketing Automation Expert
+  - Data Analytics Master
+
+✅ Swarm fully initialized and ready!
+
+🚀 Starting RevOps Swarm Demo
+
+============================================================
+
+📋 SCENARIO: Pipeline Optimization
+📝 Analyze and optimize the sales pipeline for better conversion
+🎯 Expected: Identify bottlenecks and recommend automation
+
+🔄 Queen is gathering input from agents...
+
+  📊 crm-specialist generated report (confidence: 49%)
+  📊 marketing-specialist generated report (confidence: 49%)
+  📊 analytics-specialist generated report (confidence: 0%)
+🗳️  Voting started: Sales pipeline showing declining conversion rates
+✅ Voting completed: Recommended by 1 agents
+Voting session not found: vote_1752378516438_46bqe0vy2, creating fallback result
+Demo error: TypeError: Cannot read properties of undefined (reading 'get')
+    at QueenAgent.synthesizeDecision (/workspaces/Agentic-Rev-Ops/src/swarm/queen/QueenAgent.ts:648:56)
+    at QueenAgent.formulateDecision (/workspaces/Agentic-Rev-Ops/src/swarm/queen/QueenAgent.ts:509:21)
+    at async QueenAgent.makeStrategicDecision (/workspaces/Agentic-Rev-Ops/src/swarm/queen/QueenAgent.ts:180:22)
+    at async SwarmDemo.runScenario (/workspaces/Agentic-Rev-Ops/src/swarm/demo/SwarmDemo.ts:220:18)
+    at async SwarmDemo.runDemo (/workspaces/Agentic-Rev-Ops/src/swarm/demo/SwarmDemo.ts:188:7)
+    at async <anonymous> (/workspaces/Agentic-Rev-Ops/src/swarm/demo/SwarmDemo.ts:355:7)

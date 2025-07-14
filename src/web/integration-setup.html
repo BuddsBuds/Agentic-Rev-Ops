@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Setup - Agentic RevOps</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .integration-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .integration-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .integration-card.connected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .integration-card.pending {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+        }
+
+        .integration-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .integration-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .integration-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .integration-info p {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-connected {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-disconnected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .integration-features {
+            margin-bottom: 1.5rem;
+        }
+
+        .integration-features h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .feature-list li i {
+            color: #10b981;
+            font-size: 0.75rem;
+        }
+
+        .integration-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Configuration Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background: white;
+            font-size: 1rem;
+        }
+
+        .oauth-flow {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .oauth-flow h4 {
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+
+        .oauth-flow p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .progress-step.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .progress-step.completed {
+            background: #10b981;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .integration-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .integration-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="header">
+                <h1>🔌 Integration Setup</h1>
+                <p>Connect your external systems to unlock the full power of Agentic RevOps. Configure integrations with your favorite tools and platforms.</p>
+            </div>
+
+            <div class="progress-steps">
+                <div class="progress-step completed">
+                    <i class="fas fa-check"></i>
+                    System Ready
+                </div>
+                <div class="progress-step active">
+                    <i class="fas fa-plug"></i>
+                    Configure Integrations
+                </div>
+                <div class="progress-step">
+                    <i class="fas fa-rocket"></i>
+                    Launch
+                </div>
+            </div>
+
+            <div class="integration-grid">
+                <div v-for="integration in integrations" 
+                     :key="integration.id" 
+                     class="integration-card"
+                     :class="integration.status">
+                    
+                    <div class="status-badge" :class="'status-' + integration.status">
+                        {{ integration.status }}
+                    </div>
+
+                    <div class="integration-header">
+                        <div class="integration-icon" :style="{background: integration.color}">
+                            <i :class="integration.icon"></i>
+                        </div>
+                        <div class="integration-info">
+                            <h3>{{ integration.name }}</h3>
+                            <p>{{ integration.description }}</p>
+                        </div>
+                    </div>
+
+                    <div class="integration-features">
+                        <h4>Key Features</h4>
+                        <ul class="feature-list">
+                            <li v-for="feature in integration.features" :key="feature">
+                                <i class="fas fa-check"></i>
+                                {{ feature }}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="integration-actions">
+                        <button v-if="integration.status === 'disconnected'" 
+                                class="btn btn-primary"
+                                @click="configureIntegration(integration)">
+                            <i class="fas fa-cog"></i>
+                            Configure
+                        </button>
+                        
+                        <button v-if="integration.status === 'connected'" 
+                                class="btn btn-success"
+                                @click="manageIntegration(integration)">
+                            <i class="fas fa-check"></i>
+                            Manage
+                        </button>
+                        
+                        <button v-if="integration.status === 'pending'" 
+                                class="btn btn-primary"
+                                @click="completeSetup(integration)">
+                            <i class="fas fa-play"></i>
+                            Complete Setup
+                        </button>
+
+                        <button class="btn btn-secondary"
+                                @click="testConnection(integration)">
+                            <i class="fas fa-heartbeat"></i>
+                            Test
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div style="text-align: center; margin-top: 3rem;">
+                <button class="btn btn-primary" style="margin-right: 1rem;" @click="autoDetectIntegrations">
+                    <i class="fas fa-magic"></i>
+                    Auto-Detect Integrations
+                </button>
+                <button class="btn btn-secondary" @click="importConfig">
+                    <i class="fas fa-upload"></i>
+                    Import Configuration
+                </button>
+            </div>
+        </div>
+
+        <!-- Configuration Modal -->
+        <div v-if="showModal" class="modal-overlay" @click="closeModal">
+            <div class="modal" @click.stop>
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title">Configure {{ selectedIntegration?.name }}</h3>
+                        <p style="color: #64748b; font-size: 0.875rem;">{{ selectedIntegration?.description }}</p>
+                    </div>
+                    <button class="modal-close" @click="closeModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Asana Configuration -->
+                    <div v-if="selectedIntegration?.id === 'asana'">
+                        <div class="oauth-flow">
+                            <h4>OAuth 2.0 Setup</h4>
+                            <p>Connect securely to your Asana workspace using OAuth authentication.</p>
+                            <button class="btn btn-primary" @click="startOAuthFlow('asana')">
+                                <i class="fab fa-asana"></i>
+                                Connect to Asana
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Workspace</label>
+                            <select class="form-select" v-model="config.asana.workspace">
+                                <option value="">Select workspace...</option>
+                                <option value="revops-team">RevOps Team</option>
+                                <option value="marketing">Marketing Department</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Default Project Template</label>
+                            <select class="form-select" v-model="config.asana.template">
+                                <option value="client-onboarding">Client Onboarding</option>
+                                <option value="campaign-launch">Campaign Launch</option>
+                                <option value="analysis-project">Analysis Project</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Google Workspace Configuration -->
+                    <div v-if="selectedIntegration?.id === 'google'">
+                        <div class="oauth-flow">
+                            <h4>Google Workspace Setup</h4>
+                            <p>Connect to Google Workspace for document collaboration and productivity tools.</p>
+                            <button class="btn btn-primary" @click="startOAuthFlow('google')">
+                                <i class="fab fa-google"></i>
+                                Connect to Google
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Domain</label>
+                            <input type="text" class="form-input" v-model="config.google.domain" placeholder="company.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Root Folder</label>
+                            <input type="text" class="form-input" v-model="config.google.rootFolder" placeholder="RevOps Documents">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Services to Enable</label>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" v-model="config.google.services.drive">
+                                    Google Drive
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" v-model="config.google.services.docs">
+                                    Google Docs
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" v-model="config.google.services.sheets">
+                                    Google Sheets
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" v-model="config.google.services.calendar">
+                                    Google Calendar
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notion Configuration -->
+                    <div v-if="selectedIntegration?.id === 'notion'">
+                        <div class="oauth-flow">
+                            <h4>Notion Integration</h4>
+                            <p>Connect to your Notion workspace for knowledge management and documentation.</p>
+                            <button class="btn btn-primary" @click="startOAuthFlow('notion')">
+                                <i class="fas fa-book"></i>
+                                Connect to Notion
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Workspace Name</label>
+                            <input type="text" class="form-input" v-model="config.notion.workspace" placeholder="RevOps Command Center">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Database Structure</label>
+                            <select class="form-select" v-model="config.notion.structure">
+                                <option value="standard">Standard RevOps Structure</option>
+                                <option value="minimal">Minimal Setup</option>
+                                <option value="advanced">Advanced with Analytics</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Salesforce Configuration -->
+                    <div v-if="selectedIntegration?.id === 'salesforce'">
+                        <div class="form-group">
+                            <label class="form-label">Instance URL</label>
+                            <input type="url" class="form-input" v-model="config.salesforce.instanceUrl" placeholder="https://company.salesforce.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">API Version</label>
+                            <select class="form-select" v-model="config.salesforce.apiVersion">
+                                <option value="v59.0">v59.0 (Latest)</option>
+                                <option value="v58.0">v58.0</option>
+                                <option value="v57.0">v57.0</option>
+                            </select>
+                        </div>
+                        
+                        <div class="oauth-flow">
+                            <h4>Salesforce OAuth</h4>
+                            <p>Authenticate with your Salesforce org to access CRM data.</p>
+                            <button class="btn btn-primary" @click="startOAuthFlow('salesforce')">
+                                <i class="fab fa-salesforce"></i>
+                                Connect to Salesforce
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                        <button class="btn btn-secondary" @click="closeModal" style="flex: 1;">
+                            Cancel
+                        </button>
+                        <button class="btn btn-primary" @click="saveConfiguration" style="flex: 1;">
+                            <i class="fas fa-save"></i>
+                            Save & Test Connection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    showModal: false,
+                    selectedIntegration: null,
+                    
+                    integrations: [
+                        {
+                            id: 'asana',
+                            name: 'Asana',
+                            description: 'Project management and task tracking for RevOps workflows',
+                            icon: 'fas fa-tasks',
+                            color: '#F06A6A',
+                            status: 'disconnected',
+                            features: [
+                                'Automated project creation',
+                                'Task dependencies mapping',
+                                'Progress tracking',
+                                'Team collaboration',
+                                'Custom field automation'
+                            ]
+                        },
+                        {
+                            id: 'google',
+                            name: 'Google Workspace',
+                            description: 'Document collaboration and productivity suite',
+                            icon: 'fab fa-google',
+                            color: '#4285F4',
+                            status: 'connected',
+                            features: [
+                                'Drive folder automation',
+                                'Document templates',
+                                'Sheets data analysis',
+                                'Calendar integration',
+                                'Real-time collaboration'
+                            ]
+                        },
+                        {
+                            id: 'notion',
+                            name: 'Notion',
+                            description: 'All-in-one workspace for notes, docs, and databases',
+                            icon: 'fas fa-book',
+                            color: '#000000',
+                            status: 'pending',
+                            features: [
+                                'Knowledge base creation',
+                                'Database relations',
+                                'Template automation',
+                                'Rich content editing',
+                                'Cross-platform sync'
+                            ]
+                        },
+                        {
+                            id: 'salesforce',
+                            name: 'Salesforce',
+                            description: 'Customer relationship management platform',
+                            icon: 'fab fa-salesforce',
+                            color: '#00A1E0',
+                            status: 'disconnected',
+                            features: [
+                                'Lead management',
+                                'Opportunity tracking',
+                                'Pipeline analytics',
+                                'Contact synchronization',
+                                'Custom object support'
+                            ]
+                        },
+                        {
+                            id: 'hubspot',
+                            name: 'HubSpot',
+                            description: 'Inbound marketing and sales platform',
+                            icon: 'fas fa-chart-line',
+                            color: '#FF7A59',
+                            status: 'disconnected',
+                            features: [
+                                'Contact management',
+                                'Deal pipeline',
+                                'Marketing automation',
+                                'Analytics dashboard',
+                                'Email sequences'
+                            ]
+                        },
+                        {
+                            id: 'slack',
+                            name: 'Slack',
+                            description: 'Team communication and collaboration',
+                            icon: 'fab fa-slack',
+                            color: '#4A154B',
+                            status: 'connected',
+                            features: [
+                                'Real-time notifications',
+                                'Channel automation',
+                                'Workflow triggers',
+                                'Bot integration',
+                                'File sharing'
+                            ]
+                        }
+                    ],
+
+                    config: {
+                        asana: {
+                            workspace: '',
+                            template: 'client-onboarding'
+                        },
+                        google: {
+                            domain: '',
+                            rootFolder: 'RevOps Documents',
+                            services: {
+                                drive: true,
+                                docs: true,
+                                sheets: true,
+                                calendar: true
+                            }
+                        },
+                        notion: {
+                            workspace: 'RevOps Command Center',
+                            structure: 'standard'
+                        },
+                        salesforce: {
+                            instanceUrl: '',
+                            apiVersion: 'v59.0'
+                        }
+                    }
+                }
+            },
+
+            methods: {
+                configureIntegration(integration) {
+                    this.selectedIntegration = integration;
+                    this.showModal = true;
+                },
+
+                manageIntegration(integration) {
+                    this.selectedIntegration = integration;
+                    this.showModal = true;
+                },
+
+                completeSetup(integration) {
+                    this.selectedIntegration = integration;
+                    this.showModal = true;
+                },
+
+                closeModal() {
+                    this.showModal = false;
+                    this.selectedIntegration = null;
+                },
+
+                startOAuthFlow(provider) {
+                    // Simulate OAuth flow
+                    alert(`Starting OAuth flow for ${provider}. In a real implementation, this would redirect to the OAuth provider.`);
+                    
+                    // Simulate successful OAuth
+                    setTimeout(() => {
+                        if (this.selectedIntegration) {
+                            this.selectedIntegration.status = 'connected';
+                        }
+                        alert('OAuth flow completed successfully!');
+                    }, 2000);
+                },
+
+                saveConfiguration() {
+                    if (this.selectedIntegration) {
+                        this.selectedIntegration.status = 'connected';
+                        alert(`${this.selectedIntegration.name} configuration saved successfully!`);
+                        this.closeModal();
+                    }
+                },
+
+                testConnection(integration) {
+                    alert(`Testing connection to ${integration.name}...`);
+                    
+                    // Simulate connection test
+                    setTimeout(() => {
+                        const success = Math.random() > 0.2; // 80% success rate
+                        if (success) {
+                            alert(`Connection to ${integration.name} successful!`);
+                            integration.status = 'connected';
+                        } else {
+                            alert(`Connection to ${integration.name} failed. Please check your configuration.`);
+                            integration.status = 'disconnected';
+                        }
+                    }, 1500);
+                },
+
+                autoDetectIntegrations() {
+                    alert('Scanning for available integrations...');
+                    
+                    // Simulate auto-detection
+                    setTimeout(() => {
+                        let detected = 0;
+                        this.integrations.forEach(integration => {
+                            if (integration.status === 'disconnected' && Math.random() > 0.5) {
+                                integration.status = 'pending';
+                                detected++;
+                            }
+                        });
+                        
+                        if (detected > 0) {
+                            alert(`Found ${detected} available integration(s). Please complete the setup for each one.`);
+                        } else {
+                            alert('No new integrations detected. Make sure your services are accessible and properly configured.');
+                        }
+                    }, 2000);
+                },
+
+                importConfig() {
+                    // Create a file input element
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                try {
+                                    const config = JSON.parse(e.target.result);
+                                    alert('Configuration imported successfully!');
+                                    // Apply configuration logic here
+                                } catch (error) {
+                                    alert('Invalid configuration file. Please check the format.');
+                                }
+                            };
+                            reader.readAsText(file);
+                        }
+                    };
+                    input.click();
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
