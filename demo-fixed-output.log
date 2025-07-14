@@ -1,0 +1,6 @@
+npm ERR! Missing script: "demo-fixed.js"
+npm ERR! 
+npm ERR! To see a list of scripts, run:
+npm ERR!   npm run
+
+npm ERR! A complete log of this run can be found in: /home/codespace/.npm/_logs/2025-07-13T03_49_22_049Z-debug-0.log

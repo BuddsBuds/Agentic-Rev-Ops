@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your clients with AI-powered revenue operations">
+    <title>Clients - Agentic RevOps</title>
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="../css/design-system.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Client List Specific Styles */
+        .page-header {
+            background-color: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: var(--space-8) 0;
+            margin-bottom: var(--space-8);
+        }
+        
+        [data-theme="dark"] .page-header {
+            background-color: var(--gray-50);
+        }
+        
+        .filters-bar {
+            background-color: white;
+            padding: var(--space-4);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-6);
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-4);
+            align-items: center;
+        }
+        
+        [data-theme="dark"] .filters-bar {
+            background-color: var(--gray-50);
+        }
+        
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--space-6);
+        }
+        
+        .client-card {
+            background-color: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .client-card {
+            background-color: var(--gray-50);
+        }
+        
+        .client-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform var(--transition-slow);
+        }
+        
+        .client-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-200);
+        }
+        
+        .client-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .client-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
+            background-color: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--primary-600);
+            margin-bottom: var(--space-4);
+        }
+        
+        .client-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-4);
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .metric-item {
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        [data-theme="dark"] .metric-value {
+            color: var(--gray-900);
+        }
+        
+        .metric-label {
+            font-size: var(--text-xs);
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--space-16) var(--space-8);
+        }
+        
+        .empty-state-icon {
+            font-size: 5rem;
+            color: var(--gray-300);
+            margin-bottom: var(--space-6);
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+        
+        @media (max-width: 1024px) {
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .client-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .stat-card {
+            background-color: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+        }
+        
+        [data-theme="dark"] .stat-card {
+            background-color: var(--gray-50);
+        }
+        
+        .onboarding-progress {
+            margin-top: var(--space-3);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
+            transition: width var(--transition-slow);
+        }
+        
+        .integration-icons {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+        }
+        
+        .integration-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-sm);
+            background-color: var(--gray-100);
+            color: var(--gray-600);
+        }
+        
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            background-color: var(--gray-100);
+            border-radius: var(--radius-lg);
+            padding: var(--space-1);
+        }
+        
+        .view-toggle button {
+            padding: var(--space-2) var(--space-3);
+            border: none;
+            background: none;
+            color: var(--gray-600);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .view-toggle button.active {
+            background-color: white;
+            color: var(--gray-900);
+            box-shadow: var(--shadow-xs);
+        }
+        
+        [data-theme="dark"] .view-toggle button.active {
+            background-color: var(--gray-50);
+        }
+        
+        /* List View */
+        .client-list {
+            background-color: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .client-list {
+            background-color: var(--gray-50);
+        }
+        
+        .client-list-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4) var(--space-6);
+            border-bottom: 1px solid var(--gray-200);
+            transition: background-color var(--transition-fast);
+            cursor: pointer;
+        }
+        
+        .client-list-item:hover {
+            background-color: var(--gray-50);
+        }
+        
+        [data-theme="dark"] .client-list-item:hover {
+            background-color: var(--gray-100);
+        }
+        
+        .client-list-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to main content link -->
+    <div class="container">
+        <!-- Navigation -->
+        <nav style="padding: var(--space-4) 0; border-bottom: 1px solid var(--gray-200); margin-bottom: var(--space-8);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: var(--space-6);">
+                    <a href="/" style="display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--gray-900);">
+                        <i class="fas fa-chart-line" style="font-size: var(--text-2xl); color: var(--primary-500);"></i>
+                        <span style="font-size: var(--text-xl); font-weight: 700;">Agentic RevOps</span>
+                    </a>
+                    
+                    <div style="display: flex; gap: var(--space-4);">
+                        <a href="/" class="btn btn-ghost btn-sm">Dashboard</a>
+                        <a href="/clients.html" class="btn btn-ghost btn-sm" style="background-color: var(--primary-100); color: var(--primary-700);">Clients</a>
+                        <a href="/analytics.html" class="btn btn-ghost btn-sm">Analytics</a>
+                        <a href="/settings.html" class="btn btn-ghost btn-sm">Settings</a>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    <button class="btn btn-ghost btn-icon" onclick="uiComponents.toggleTheme()" aria-label="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add New Client
+                    </button>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Page Header -->
+        <header class="page-header">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+                <div>
+                    <h1 style="margin-bottom: var(--space-2);">Clients</h1>
+                    <p style="color: var(--gray-600); margin-bottom: 0;">Manage your clients and their RevOps strategies</p>
+                </div>
+                
+                <div class="view-toggle">
+                    <button class="active" onclick="setView('grid')" aria-label="Grid view">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button onclick="setView('list')" aria-label="List view">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Overview -->
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <div class="metric-value">24</div>
+                    <div class="metric-label">Total Clients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="metric-value">18</div>
+                    <div class="metric-label">Active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="metric-value">$12.5M</div>
+                    <div class="metric-label">Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="metric-value">89%</div>
+                    <div class="metric-label">Retention Rate</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Filters Bar -->
+        <div class="filters-bar">
+            <div style="flex: 1; position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: var(--space-4); top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+                <input type="search" 
+                       class="form-input" 
+                       placeholder="Search clients..." 
+                       style="padding-left: var(--space-10);"
+                       aria-label="Search clients">
+            </div>
+            
+            <select class="form-select" style="width: auto;">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="onboarding">Onboarding</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            
+            <select class="form-select" style="width: auto;">
+                <option value="">All Industries</option>
+                <option value="tech">Technology</option>
+                <option value="retail">Retail</option>
+                <option value="finance">Finance</option>
+                <option value="healthcare">Healthcare</option>
+            </select>
+            
+            <select class="form-select" style="width: auto;">
+                <option value="name">Sort by Name</option>
+                <option value="revenue">Sort by Revenue</option>
+                <option value="date">Sort by Date Added</option>
+                <option value="activity">Sort by Activity</option>
+            </select>
+            
+            <button class="btn btn-ghost btn-sm">
+                <i class="fas fa-filter"></i>
+                More Filters
+            </button>
+        </div>
+        
+        <!-- Clients Grid View -->
+        <div id="gridView" class="client-grid">
+            <!-- Client Card 1 -->
+            <div class="client-card animate-on-scroll" onclick="goToClientDashboard('1')">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-4);">
+                    <div class="client-logo">AC</div>
+                    <span class="badge badge-success">Active</span>
+                </div>
+                
+                <h3 style="margin-bottom: var(--space-2);">Acme Corporation</h3>
+                <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: var(--space-4);">
+                    <i class="fas fa-globe" style="margin-right: var(--space-2);"></i>acme.com
+                </p>
+                
+                <div style="display: flex; align-items: center; gap: var(--space-4); font-size: var(--text-sm); color: var(--gray-600);">
+                    <span><i class="fas fa-user"></i> John Smith</span>
+                    <span><i class="fas fa-calendar"></i> Jan 2024</span>
+                </div>
+                
+                <div class="client-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">$2.5M</div>
+                        <div class="metric-label">Revenue</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" style="color: var(--success-600);">+15%</div>
+                        <div class="metric-label">Growth</div>
+                    </div>
+                </div>
+                
+                <div class="integration-icons">
+                    <div class="integration-icon" style="background-color: #00A1E0; color: white;">
+                        <i class="fab fa-salesforce"></i>
+                    </div>
+                    <div class="integration-icon" style="background-color: #4285F4; color: white;">
+                        <i class="fab fa-google"></i>
+                    </div>
+                    <div class="integration-icon" style="background-color: #FFD60A; color: black;">
+                        <i class="fab fa-mailchimp"></i>
+                    </div>
+                    <div class="integration-icon">
+                        +2
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Client Card 2 -->
+            <div class="client-card animate-on-scroll" onclick="goToClientDashboard('2')">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-4);">
+                    <div class="client-logo" style="background-color: var(--secondary-100); color: var(--secondary-600);">TS</div>
+                    <span class="badge badge-success">Active</span>
+                </div>
+                
+                <h3 style="margin-bottom: var(--space-2);">TechStart Inc.</h3>
+                <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: var(--space-4);">
+                    <i class="fas fa-globe" style="margin-right: var(--space-2);"></i>techstart.io
+                </p>
+                
+                <div style="display: flex; align-items: center; gap: var(--space-4); font-size: var(--text-sm); color: var(--gray-600);">
+                    <span><i class="fas fa-user"></i> Sarah Johnson</span>
+                    <span><i class="fas fa-calendar"></i> Jan 2024</span>
+                </div>
+                
+                <div class="client-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">$850K</div>
+                        <div class="metric-label">Revenue</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" style="color: var(--success-600);">+45%</div>
+                        <div class="metric-label">Growth</div>
+                    </div>
+                </div>
+                
+                <div class="integration-icons">
+                    <div class="integration-icon" style="background-color: #FF7A59; color: white;">
+                        <i class="fas fa-h-square"></i>
+                    </div>
+                    <div class="integration-icon" style="background-color: #000; color: white;">
+                        <i class="fas fa-sticky-note"></i>
+                    </div>
+                    <div class="integration-icon" style="background-color: #4A154B; color: white;">
+                        <i class="fab fa-slack"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Client Card 3 (Onboarding) -->
+            <div class="client-card animate-on-scroll" onclick="goToClientDashboard('3')">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-4);">
+                    <div class="client-logo" style="background-color: var(--warning-100); color: var(--warning-600);">GR</div>
+                    <span class="badge badge-warning">Onboarding</span>
+                </div>
+                
+                <h3 style="margin-bottom: var(--space-2);">Global Retail Co.</h3>
+                <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: var(--space-4);">
+                    <i class="fas fa-globe" style="margin-right: var(--space-2);"></i>globalretail.com
+                </p>
+                
+                <div style="display: flex; align-items: center; gap: var(--space-4); font-size: var(--text-sm); color: var(--gray-600);">
+                    <span><i class="fas fa-user"></i> Michael Chen</span>
+                    <span><i class="fas fa-calendar"></i> Feb 2024</span>
+                </div>
+                
+                <div class="onboarding-progress">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                        <span style="font-size: var(--text-sm); font-weight: 500;">Onboarding Progress</span>
+                        <span style="font-size: var(--text-sm); color: var(--gray-600);">65%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%;"></div>
+                    </div>
+                    <p style="font-size: var(--text-xs); color: var(--gray-600); margin-top: var(--space-2);">
+                        3 of 5 steps completed
+                    </p>
+                </div>
+                
+                <div class="integration-icons">
+                    <div class="integration-icon" style="background-color: #F06A6A; color: white;">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="integration-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add New Client Card -->
+            <div class="client-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; border-style: dashed; cursor: pointer;" onclick="openAddClientModal()">
+                <i class="fas fa-plus-circle" style="font-size: var(--text-4xl); color: var(--gray-400); margin-bottom: var(--space-4);"></i>
+                <h3 style="color: var(--gray-600); font-weight: 500;">Add New Client</h3>
+                <p style="font-size: var(--text-sm); color: var(--gray-500); text-align: center; margin-top: var(--space-2);">
+                    Click to onboard a new client with AI-powered setup
+                </p>
+            </div>
+        </div>
+        
+        <!-- List View (Hidden by default) -->
+        <div id="listView" class="client-list" style="display: none;">
+            <!-- List items would go here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h2 style="margin-bottom: var(--space-3);">No clients found</h2>
+            <p style="color: var(--gray-600); margin-bottom: var(--space-6);">
+                Get started by adding your first client or adjust your search filters
+            </p>
+            <button class="btn btn-primary btn-lg" onclick="openAddClientModal()">
+                <i class="fas fa-plus"></i>
+                Add Your First Client
+            </button>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../js/ui-components.js"></script>
+    <script>
+        // View toggle functionality
+        function setView(view) {
+            const gridView = document.getElementById('gridView');
+            const listView = document.getElementById('listView');
+            const toggleButtons = document.querySelectorAll('.view-toggle button');
+            
+            toggleButtons.forEach(btn => btn.classList.remove('active'));
+            
+            if (view === 'grid') {
+                gridView.style.display = 'grid';
+                listView.style.display = 'none';
+                toggleButtons[0].classList.add('active');
+            } else {
+                gridView.style.display = 'none';
+                listView.style.display = 'block';
+                toggleButtons[1].classList.add('active');
+                
+                // Populate list view if empty
+                if (!listView.innerHTML.trim()) {
+                    populateListView();
+                }
+            }
+        }
+        
+        function populateListView() {
+            const listView = document.getElementById('listView');
+            const clients = [
+                { id: '1', name: 'Acme Corporation', revenue: '$2.5M', status: 'Active', domain: 'acme.com' },
+                { id: '2', name: 'TechStart Inc.', revenue: '$850K', status: 'Active', domain: 'techstart.io' },
+                { id: '3', name: 'Global Retail Co.', revenue: 'Onboarding', status: 'Onboarding', domain: 'globalretail.com' }
+            ];
+            
+            listView.innerHTML = clients.map(client => `
+                <div class="client-list-item" onclick="goToClientDashboard('${client.id}')">
+                    <div style="display: flex; align-items: center; gap: var(--space-4);">
+                        <div class="client-logo" style="width: 48px; height: 48px; font-size: var(--text-lg);">
+                            ${client.name.split(' ').map(w => w[0]).join('')}
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: var(--space-1);">${client.name}</h4>
+                            <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: 0;">
+                                <i class="fas fa-globe"></i> ${client.domain}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--space-8);">
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">${client.revenue}</div>
+                            <div style="font-size: var(--text-xs); color: var(--gray-600);">Revenue</div>
+                        </div>
+                        <span class="badge badge-${client.status === 'Active' ? 'success' : 'warning'}">${client.status}</span>
+                    </div>
+                    
+                    <button class="btn btn-ghost btn-sm">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // Navigation functions
+        function goToClientDashboard(clientId) {
+            window.location.href = `/client-dashboard.html?id=${clientId}`;
+        }
+        
+        function openAddClientModal() {
+            uiComponents.createModal({
+                title: 'Add New Client',
+                size: 'large',
+                content: `
+                    <form id="addClientForm">
+                        <div class="grid grid-cols-2 md:grid-cols-1" style="gap: var(--space-6);">
+                            <div>
+                                <h4 style="margin-bottom: var(--space-4);">Basic Information</h4>
+                                <div class="form-group">
+                                    <label class="form-label" for="clientName">Company Name *</label>
+                                    <input type="text" class="form-input" id="clientName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="clientDomain">Website</label>
+                                    <input type="url" class="form-input" id="clientDomain" placeholder="https://example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="clientIndustry">Industry</label>
+                                    <select class="form-select" id="clientIndustry">
+                                        <option value="">Select industry</option>
+                                        <option value="tech">Technology</option>
+                                        <option value="retail">Retail</option>
+                                        <option value="finance">Finance</option>
+                                        <option value="healthcare">Healthcare</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 style="margin-bottom: var(--space-4);">Primary Contact</h4>
+                                <div class="form-group">
+                                    <label class="form-label" for="contactName">Contact Name *</label>
+                                    <input type="text" class="form-input" id="contactName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="contactEmail">Email *</label>
+                                    <input type="email" class="form-input" id="contactEmail" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="contactPhone">Phone</label>
+                                    <input type="tel" class="form-input" id="contactPhone">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: var(--space-6); padding: var(--space-4); background-color: var(--primary-50); border-radius: var(--radius-lg);">
+                            <h4 style="margin-bottom: var(--space-2); color: var(--primary-700);">
+                                <i class="fas fa-magic"></i> AI-Powered Onboarding
+                            </h4>
+                            <p style="font-size: var(--text-sm); color: var(--primary-700); margin-bottom: 0;">
+                                Our AI agents will automatically analyze the client's business, set up integrations, 
+                                and create an initial RevOps strategy tailored to their needs.
+                            </p>
+                        </div>
+                    </form>
+                `,
+                actions: [
+                    {
+                        label: 'Cancel',
+                        class: 'btn-secondary',
+                        onclick: 'uiComponents.closeActiveModal()'
+                    },
+                    {
+                        label: 'Add Client & Start Onboarding',
+                        class: 'btn-primary',
+                        icon: 'fas fa-rocket',
+                        onclick: 'startClientOnboarding()'
+                    }
+                ]
+            });
+        }
+        
+        function startClientOnboarding() {
+            const form = document.getElementById('addClientForm');
+            if (uiComponents.validateForm(form)) {
+                uiComponents.closeActiveModal();
+                uiComponents.showNotification({
+                    type: 'success',
+                    title: 'Client Added Successfully',
+                    message: 'AI agents are now setting up the RevOps environment for your new client.',
+                    actions: [
+                        {
+                            label: 'View Onboarding Progress',
+                            onclick: 'window.location.href="/client-onboarding.html"'
+                        }
+                    ]
+                });
+            }
+        }
+        
+        // Search and filter functionality
+        const searchInput = document.querySelector('input[type="search"]');
+        searchInput.addEventListener('input', uiComponents.debounce((e) => {
+            // Implement search logic
+            console.log('Searching for:', e.target.value);
+        }, 300));
+        
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', () => {
+            uiComponents.addScrollAnimations();
+        });
+    </script>
+</body>
+</html>

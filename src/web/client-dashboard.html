@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - Agentic RevOps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-button.active { 
+            background-color: #3b82f6; 
+            color: white; 
+        }
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .chat-message {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-chart-line mr-2"></i>Agentic RevOps
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/clients.html" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Clients
+                    </a>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                        <i class="fas fa-cog mr-2"></i>Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Client Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900" id="clientName">Loading...</h1>
+                    <p class="text-gray-600 mt-1" id="clientDomain"></p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                        <i class="fas fa-circle text-green-500 text-xs mr-2"></i>Active
+                    </span>
+                    <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm">
+                        <i class="fas fa-rocket mr-2"></i>Launch Campaign
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 overflow-x-auto">
+                <button class="tab-button active px-4 py-4 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 whitespace-nowrap" data-tab="overview">
+                    <i class="fas fa-chart-pie mr-2"></i>Overview
+                </button>
+                <button class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 whitespace-nowrap" data-tab="chat">
+                    <i class="fas fa-comments mr-2"></i>RevOps Chat
+                </button>
+                <button class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 whitespace-nowrap" data-tab="content">
+                    <i class="fas fa-file-alt mr-2"></i>Content & Plans
+                </button>
+                <button class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 whitespace-nowrap" data-tab="social">
+                    <i class="fas fa-share-alt mr-2"></i>Social Media
+                </button>
+                <button class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 whitespace-nowrap" data-tab="analytics">
+                    <i class="fas fa-chart-bar mr-2"></i>Analytics
+                </button>
+                <button class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 whitespace-nowrap" data-tab="integrations">
+                    <i class="fas fa-plug mr-2"></i>Integrations
+                </button>
+                <button class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 whitespace-nowrap" data-tab="documents">
+                    <i class="fas fa-folder mr-2"></i>Documents
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <!-- Metrics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-dollar-sign text-blue-600 text-xl"></i>
+                        </div>
+                        <span class="text-green-600 text-sm font-medium">+12.5%</span>
+                    </div>
+                    <h3 class="text-gray-600 text-sm">Revenue</h3>
+                    <p class="text-2xl font-bold text-gray-900">$2.5M</p>
+                </div>
+                
+                <div class="metric-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-green-100 p-3 rounded-lg">
+                            <i class="fas fa-users text-green-600 text-xl"></i>
+                        </div>
+                        <span class="text-green-600 text-sm font-medium">+8.3%</span>
+                    </div>
+                    <h3 class="text-gray-600 text-sm">Leads</h3>
+                    <p class="text-2xl font-bold text-gray-900">1,234</p>
+                </div>
+                
+                <div class="metric-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-purple-100 p-3 rounded-lg">
+                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        </div>
+                        <span class="text-red-600 text-sm font-medium">-2.1%</span>
+                    </div>
+                    <h3 class="text-gray-600 text-sm">Conversion</h3>
+                    <p class="text-2xl font-bold text-gray-900">24.5%</p>
+                </div>
+                
+                <div class="metric-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-orange-100 p-3 rounded-lg">
+                            <i class="fas fa-bullhorn text-orange-600 text-xl"></i>
+                        </div>
+                        <span class="text-green-600 text-sm font-medium">Active</span>
+                    </div>
+                    <h3 class="text-gray-600 text-sm">Campaigns</h3>
+                    <p class="text-2xl font-bold text-gray-900">5</p>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Revenue Trend</h3>
+                    <canvas id="revenueChart" height="200"></canvas>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Lead Sources</h3>
+                    <canvas id="leadSourcesChart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between py-3 border-b">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 p-2 rounded-lg mr-4">
+                                <i class="fas fa-check text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Q1 Marketing Plan Approved</p>
+                                <p class="text-sm text-gray-600">Generated by RevOps AI team</p>
+                            </div>
+                        </div>
+                        <span class="text-sm text-gray-500">2 hours ago</span>
+                    </div>
+                    <div class="flex items-center justify-between py-3 border-b">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-2 rounded-lg mr-4">
+                                <i class="fas fa-chart-bar text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">SEO Analysis Completed</p>
+                                <p class="text-sm text-gray-600">15 recommendations identified</p>
+                            </div>
+                        </div>
+                        <span class="text-sm text-gray-500">5 hours ago</span>
+                    </div>
+                    <div class="flex items-center justify-between py-3">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 p-2 rounded-lg mr-4">
+                                <i class="fas fa-rocket text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Email Campaign Launched</p>
+                                <p class="text-sm text-gray-600">Target: 5,000 subscribers</p>
+                            </div>
+                        </div>
+                        <span class="text-sm text-gray-500">Yesterday</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RevOps Chat Tab -->
+        <div id="chat" class="tab-content">
+            <div class="bg-white rounded-lg shadow-md h-[600px] flex flex-col">
+                <div class="p-4 border-b">
+                    <h3 class="text-lg font-semibold">RevOps AI Team Chat</h3>
+                    <p class="text-sm text-gray-600">Collaborate with your AI-powered RevOps team</p>
+                </div>
+                
+                <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Chat messages will be dynamically added here -->
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-comments text-4xl mb-4"></i>
+                        <p>Start a conversation with your RevOps team</p>
+                    </div>
+                </div>
+                
+                <div class="p-4 border-t">
+                    <form id="chatForm" class="flex space-x-4">
+                        <input type="text" id="chatInput" 
+                               placeholder="Ask your RevOps team anything..." 
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit" 
+                                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-paper-plane mr-2"></i>Send
+                        </button>
+                    </form>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button class="quick-prompt text-xs bg-gray-100 px-3 py-1 rounded-full hover:bg-gray-200">
+                            Create Q2 marketing plan
+                        </button>
+                        <button class="quick-prompt text-xs bg-gray-100 px-3 py-1 rounded-full hover:bg-gray-200">
+                            Analyze competitor landscape
+                        </button>
+                        <button class="quick-prompt text-xs bg-gray-100 px-3 py-1 rounded-full hover:bg-gray-200">
+                            Generate lead nurture campaign
+                        </button>
+                        <button class="quick-prompt text-xs bg-gray-100 px-3 py-1 rounded-full hover:bg-gray-200">
+                            Review conversion funnel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content & Plans Tab -->
+        <div id="content" class="tab-content">
+            <div class="mb-6 flex justify-between items-center">
+                <h3 class="text-xl font-semibold">Content & Strategic Plans</h3>
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                    <i class="fas fa-plus mr-2"></i>Create New
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Content cards will be dynamically loaded -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">Approved</span>
+                        <i class="fas fa-ellipsis-h text-gray-400 cursor-pointer"></i>
+                    </div>
+                    <h4 class="font-semibold mb-2">Q1 Marketing Plan</h4>
+                    <p class="text-sm text-gray-600 mb-4">Comprehensive marketing strategy for Q1 2024 including campaigns, budget allocation, and KPIs.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Updated 2 days ago</span>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            View <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Media Tab -->
+        <div id="social" class="tab-content">
+            <div class="mb-6 flex justify-between items-center">
+                <h3 class="text-xl font-semibold">Social Media Management</h3>
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                    <i class="fas fa-plus mr-2"></i>Create Post
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Scheduled Posts -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h4 class="font-semibold mb-4">Scheduled Posts</h4>
+                        <div class="space-y-4">
+                            <!-- Post items will be dynamically loaded -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex space-x-2">
+                                        <i class="fab fa-twitter text-blue-400"></i>
+                                        <i class="fab fa-linkedin text-blue-700"></i>
+                                        <i class="fab fa-facebook text-blue-600"></i>
+                                    </div>
+                                    <span class="text-xs text-gray-500">Scheduled for Tomorrow, 10:00 AM</span>
+                                </div>
+                                <p class="text-sm mb-3">Excited to announce our new AI-powered customer insights dashboard! 🚀 Learn how data-driven decisions can transform your business...</p>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex space-x-4 text-xs text-gray-500">
+                                        <span><i class="fas fa-eye mr-1"></i>Est. reach: 5.2K</span>
+                                        <span><i class="fas fa-heart mr-1"></i>Predicted engagement: 3.4%</span>
+                                    </div>
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Social Analytics -->
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h4 class="font-semibold mb-4">Social Analytics</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-600">Total Followers</span>
+                                    <span class="font-semibold">25.4K</span>
+                                </div>
+                                <div class="text-xs text-green-600">+12% this month</div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-600">Engagement Rate</span>
+                                    <span class="font-semibold">4.8%</span>
+                                </div>
+                                <div class="text-xs text-green-600">+0.5% vs last month</div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-600">Posts This Week</span>
+                                    <span class="font-semibold">12</span>
+                                </div>
+                                <div class="text-xs text-gray-500">3 pending approval</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-2">Performance Analytics</h3>
+                <div class="flex space-x-4">
+                    <select class="px-4 py-2 border border-gray-300 rounded-lg">
+                        <option>Last 30 days</option>
+                        <option>Last 90 days</option>
+                        <option>Last 6 months</option>
+                        <option>Last year</option>
+                    </select>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                        <i class="fas fa-download mr-2"></i>Export Report
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Analytics content -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h4 class="font-semibold mb-4">Website Traffic</h4>
+                    <canvas id="trafficChart" height="250"></canvas>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h4 class="font-semibold mb-4">Conversion Funnel</h4>
+                    <canvas id="funnelChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integrations Tab -->
+        <div id="integrations" class="tab-content">
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold">Connected Integrations</h3>
+                <p class="text-gray-600">Manage your connected tools and services</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Integration cards will be dynamically loaded -->
+            </div>
+        </div>
+
+        <!-- Documents Tab -->
+        <div id="documents" class="tab-content">
+            <div class="mb-6 flex justify-between items-center">
+                <h3 class="text-xl font-semibold">Documents & Resources</h3>
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                    <i class="fas fa-upload mr-2"></i>Upload
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <!-- Document rows will be dynamically loaded -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="client-dashboard.js"></script>
+</body>
+</html>

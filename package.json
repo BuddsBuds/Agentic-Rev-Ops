@@ -1,0 +1,138 @@
+{
+  "name": "agentic-revops",
+  "version": "1.0.0",
+  "description": "Autonomous Revenue Operations System with Queen-based Swarm Architecture",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "demo": "tsx src/swarm/demo/SwarmDemo.ts",
+    "demo-fixed": "node demo-fixed.js",
+    "admin": "node start-admin.js",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:e2e": "jest tests/e2e",
+    "test:performance": "jest tests/performance",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build",
+    "start": "node start-admin.js"
+  },
+  "keywords": [
+    "revops",
+    "revenue-operations",
+    "swarm",
+    "autonomous",
+    "ai",
+    "queen-agent",
+    "majority-voting"
+  ],
+  "author": "RevOps Team",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.51.0",
+    "@tensorflow/tfjs": "^4.22.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.10.0",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^1.20.2",
+    "cheerio": "^1.1.0",
+    "cors": "^2.8.5",
+    "events": "^3.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
+    "pg": "^8.16.3",
+    "rss-parser": "^3.13.0",
+    "simple-statistics": "^7.8.8",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cheerio": "^1.0.0",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.11",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.15.4",
+    "@types/supertest": "^2.0.16",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "express": "^4.21.2",
+    "jest": "^29.7.0",
+    "jest-html-reporter": "^3.10.2",
+    "jest-junit": "^16.0.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/web/**/*"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 85,
+        "functions": 85,
+        "lines": 85,
+        "statements": 85
+      },
+      "src/swarm/queen/**/*.ts": {
+        "branches": 95,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      },
+      "src/swarm/consensus/**/*.ts": {
+        "branches": 95,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      }
+    },
+    "reporters": [
+      "default",
+      [
+        "jest-html-reporter",
+        {
+          "outputPath": "coverage/test-report.html"
+        }
+      ],
+      [
+        "jest-junit",
+        {
+          "outputPath": "coverage/junit.xml"
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Onboarding - Agentic RevOps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .step-inactive { display: none; }
+        .step-active { display: block; }
+        .integration-card { transition: all 0.3s ease; }
+        .integration-card:hover { transform: translateY(-2px); }
+        .upload-zone { 
+            border: 2px dashed #cbd5e0; 
+            transition: all 0.3s ease;
+        }
+        .upload-zone:hover, .upload-zone.dragover { 
+            border-color: #4299e1; 
+            background-color: #ebf8ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-chart-line mr-2"></i>Agentic RevOps
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <a href="/clients.html" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Clients
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-3xl font-bold text-gray-900">Client Onboarding</h1>
+                <span class="text-sm text-gray-600">Step <span id="currentStep">1</span> of 7</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 14%"></div>
+            </div>
+        </div>
+
+        <!-- Step Navigation -->
+        <div class="bg-white rounded-lg shadow-md mb-8">
+            <div class="flex flex-wrap justify-between p-4">
+                <button class="step-nav px-4 py-2 text-sm font-medium rounded-md" data-step="1">
+                    <i class="fas fa-building mr-2"></i>Basic Info
+                </button>
+                <button class="step-nav px-4 py-2 text-sm font-medium rounded-md" data-step="2">
+                    <i class="fas fa-users mr-2"></i>Stakeholders
+                </button>
+                <button class="step-nav px-4 py-2 text-sm font-medium rounded-md" data-step="3">
+                    <i class="fas fa-share-alt mr-2"></i>Social Links
+                </button>
+                <button class="step-nav px-4 py-2 text-sm font-medium rounded-md" data-step="4">
+                    <i class="fas fa-plug mr-2"></i>Integrations
+                </button>
+                <button class="step-nav px-4 py-2 text-sm font-medium rounded-md" data-step="5">
+                    <i class="fas fa-file-alt mr-2"></i>Documents
+                </button>
+                <button class="step-nav px-4 py-2 text-sm font-medium rounded-md" data-step="6">
+                    <i class="fas fa-chart-bar mr-2"></i>Analysis
+                </button>
+                <button class="step-nav px-4 py-2 text-sm font-medium rounded-md" data-step="7">
+                    <i class="fas fa-check-circle mr-2"></i>Review
+                </button>
+            </div>
+        </div>
+
+        <!-- Step Content -->
+        <form id="onboardingForm" class="space-y-8">
+            <!-- Step 1: Basic Information -->
+            <div id="step1" class="step-content step-active bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-building mr-2"></i>Basic Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Client Name *</label>
+                        <input type="text" id="clientName" name="clientName" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Domain/Website</label>
+                        <input type="url" id="clientDomain" name="clientDomain"
+                               placeholder="https://example.com"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Stakeholders -->
+            <div id="step2" class="step-content step-inactive bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-users mr-2"></i>Key Stakeholders</h2>
+                <div id="stakeholdersList" class="space-y-4">
+                    <!-- Stakeholder template will be added dynamically -->
+                </div>
+                <button type="button" id="addStakeholder" class="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                    <i class="fas fa-plus mr-2"></i>Add Stakeholder
+                </button>
+            </div>
+
+            <!-- Step 3: Social Links -->
+            <div id="step3" class="step-content step-inactive bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-share-alt mr-2"></i>Social Media Links</h2>
+                <div id="socialLinksList" class="space-y-4">
+                    <!-- Social links will be added dynamically -->
+                </div>
+                <button type="button" id="addSocialLink" class="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                    <i class="fas fa-plus mr-2"></i>Add Social Link
+                </button>
+            </div>
+
+            <!-- Step 4: Integrations -->
+            <div id="step4" class="step-content step-inactive bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-plug mr-2"></i>Connect Tools & Platforms</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- CRM Integrations -->
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="salesforce">
+                        <i class="fab fa-salesforce text-3xl text-blue-500 mb-2"></i>
+                        <h3 class="font-semibold">Salesforce</h3>
+                        <p class="text-sm text-gray-600">CRM & Sales Management</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+                    
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="hubspot">
+                        <i class="fas fa-h-square text-3xl text-orange-500 mb-2"></i>
+                        <h3 class="font-semibold">HubSpot</h3>
+                        <p class="text-sm text-gray-600">CRM & Marketing</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+
+                    <!-- Productivity Tools -->
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="google">
+                        <i class="fab fa-google text-3xl text-red-500 mb-2"></i>
+                        <h3 class="font-semibold">Google Workspace</h3>
+                        <p class="text-sm text-gray-600">Drive, Docs, Sheets</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="notion">
+                        <i class="fas fa-sticky-note text-3xl text-gray-700 mb-2"></i>
+                        <h3 class="font-semibold">Notion</h3>
+                        <p class="text-sm text-gray-600">Workspace & Docs</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="asana">
+                        <i class="fas fa-circle text-3xl text-pink-500 mb-2"></i>
+                        <h3 class="font-semibold">Asana</h3>
+                        <p class="text-sm text-gray-600">Project Management</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+
+                    <!-- Communication -->
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="slack">
+                        <i class="fab fa-slack text-3xl text-purple-600 mb-2"></i>
+                        <h3 class="font-semibold">Slack</h3>
+                        <p class="text-sm text-gray-600">Team Communication</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="whatsapp">
+                        <i class="fab fa-whatsapp text-3xl text-green-500 mb-2"></i>
+                        <h3 class="font-semibold">WhatsApp Business</h3>
+                        <p class="text-sm text-gray-600">Messaging</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+
+                    <!-- Marketing Tools -->
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="mailchimp">
+                        <i class="fab fa-mailchimp text-3xl text-yellow-600 mb-2"></i>
+                        <h3 class="font-semibold">Mailchimp</h3>
+                        <p class="text-sm text-gray-600">Email Marketing</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+
+                    <div class="integration-card bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100" data-integration="hootsuite">
+                        <i class="fas fa-owl text-3xl text-gray-600 mb-2"></i>
+                        <h3 class="font-semibold">Hootsuite</h3>
+                        <p class="text-sm text-gray-600">Social Media Management</p>
+                        <span class="integration-status text-xs text-gray-500">Not Connected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Documents -->
+            <div id="step5" class="step-content step-inactive bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-file-alt mr-2"></i>Upload Documents</h2>
+                <div class="upload-zone rounded-lg p-8 text-center" id="uploadZone">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600 mb-2">Drag and drop files here or click to browse</p>
+                    <p class="text-sm text-gray-500">Supported: Financial Reports, Brand Materials, Style Guides, etc.</p>
+                    <input type="file" id="fileInput" multiple class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg">
+                </div>
+                <div id="uploadedFiles" class="mt-6 space-y-2">
+                    <!-- Uploaded files will appear here -->
+                </div>
+            </div>
+
+            <!-- Step 6: Analysis Configuration -->
+            <div id="step6" class="step-content step-inactive bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-chart-bar mr-2"></i>Initial Analysis</h2>
+                <p class="text-gray-600 mb-6">Select the analyses you'd like our AI to perform on your client:</p>
+                <div class="space-y-4">
+                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="analysis" value="market" checked class="mr-3">
+                        <div>
+                            <h3 class="font-semibold">Market Analysis</h3>
+                            <p class="text-sm text-gray-600">Industry trends, market size, growth opportunities</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="analysis" value="seo" checked class="mr-3">
+                        <div>
+                            <h3 class="font-semibold">SEO Analysis</h3>
+                            <p class="text-sm text-gray-600">Website performance, keywords, search visibility</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="analysis" value="competitive" checked class="mr-3">
+                        <div>
+                            <h3 class="font-semibold">Competitive Analysis</h3>
+                            <p class="text-sm text-gray-600">Competitor landscape, positioning, differentiators</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="analysis" value="audience_icp" checked class="mr-3">
+                        <div>
+                            <h3 class="font-semibold">Audience & ICP Analysis</h3>
+                            <p class="text-sm text-gray-600">Target audience, ideal customer profile, personas</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                        <input type="checkbox" name="analysis" value="social_presence" checked class="mr-3">
+                        <div>
+                            <h3 class="font-semibold">Social Presence Analysis</h3>
+                            <p class="text-sm text-gray-600">Social media performance, engagement, sentiment</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Step 7: Review & Complete -->
+            <div id="step7" class="step-content step-inactive bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-check-circle mr-2"></i>Review & Complete</h2>
+                <div id="reviewSummary" class="space-y-6">
+                    <!-- Summary will be populated dynamically -->
+                </div>
+                <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        By completing onboarding, you authorize our AI agents to begin analyzing your client's data and generating insights.
+                    </p>
+                </div>
+            </div>
+        </form>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between mt-8">
+            <button id="prevBtn" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:opacity-50">
+                <i class="fas fa-arrow-left mr-2"></i>Previous
+            </button>
+            <button id="nextBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                Next<i class="fas fa-arrow-right ml-2"></i>
+            </button>
+            <button id="completeBtn" class="hidden px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                <i class="fas fa-check mr-2"></i>Complete Onboarding
+            </button>
+        </div>
+    </div>
+
+    <!-- Integration Modal -->
+    <div id="integrationModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-bold mb-4">Connect <span id="integrationName"></span></h3>
+            <form id="integrationForm" class="space-y-4">
+                <!-- Dynamic form fields based on integration type -->
+            </form>
+            <div class="flex justify-end mt-4 space-x-2">
+                <button type="button" id="cancelIntegration" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    Cancel
+                </button>
+                <button type="button" id="saveIntegration" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    Connect
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="client-onboarding.js"></script>
+</body>
+</html>

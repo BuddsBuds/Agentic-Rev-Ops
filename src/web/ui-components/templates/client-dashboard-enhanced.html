@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agentic RevOps Client Dashboard - AI-powered revenue operations management">
+    <title>Client Dashboard - Agentic RevOps</title>
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="../css/design-system.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Enhanced Dashboard Specific Styles */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background-color: var(--gray-900);
+            color: white;
+            padding: var(--space-6);
+            overflow-y: auto;
+        }
+        
+        [data-theme="dark"] .sidebar {
+            background-color: var(--gray-100);
+            border-right: 1px solid var(--gray-200);
+        }
+        
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            font-size: var(--text-xl);
+            font-weight: 700;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+        }
+        
+        .sidebar-nav-item {
+            margin-bottom: var(--space-2);
+        }
+        
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--gray-300);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-fast);
+        }
+        
+        .sidebar-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-nav-link.active {
+            background-color: var(--primary-600);
+            color: white;
+        }
+        
+        [data-theme="dark"] .sidebar-nav-link {
+            color: var(--gray-600);
+        }
+        
+        [data-theme="dark"] .sidebar-nav-link:hover {
+            background-color: var(--gray-200);
+            color: var(--gray-900);
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .top-bar {
+            background-color: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: var(--space-4) var(--space-6);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+        
+        [data-theme="dark"] .top-bar {
+            background-color: var(--gray-50);
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding-left: var(--space-10);
+        }
+        
+        .search-bar i {
+            position: absolute;
+            left: var(--space-4);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: var(--space-6);
+            overflow-y: auto;
+            background-color: var(--gray-50);
+        }
+        
+        [data-theme="dark"] .content-area {
+            background-color: var(--gray-100);
+        }
+        
+        /* Metric Cards */
+        .metric-card {
+            background-color: white;
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .metric-card {
+            background-color: var(--gray-50);
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform var(--transition-slow);
+        }
+        
+        .metric-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-xl);
+            margin-bottom: var(--space-4);
+        }
+        
+        .metric-value {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+        
+        [data-theme="dark"] .metric-value {
+            color: var(--gray-900);
+        }
+        
+        .metric-label {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-bottom: var(--space-2);
+        }
+        
+        .metric-change {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-full);
+        }
+        
+        .metric-change.positive {
+            color: var(--success-700);
+            background-color: var(--success-50);
+        }
+        
+        .metric-change.negative {
+            color: var(--error-700);
+            background-color: var(--error-50);
+        }
+        
+        /* Chat Interface */
+        .chat-container {
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .chat-container {
+            background-color: var(--gray-50);
+        }
+        
+        .chat-header {
+            padding: var(--space-4) var(--space-6);
+            border-bottom: 1px solid var(--gray-200);
+            background-color: var(--gray-50);
+        }
+        
+        [data-theme="dark"] .chat-header {
+            background-color: var(--gray-100);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: var(--space-6);
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        .chat-message {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+            animation: message-appear var(--transition-base);
+        }
+        
+        @keyframes message-appear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .chat-bubble {
+            max-width: 70%;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-xl);
+            position: relative;
+        }
+        
+        .chat-message:not(.user) .chat-bubble {
+            background-color: var(--gray-100);
+            color: var(--gray-900);
+        }
+        
+        .chat-message.user .chat-bubble {
+            background-color: var(--primary-600);
+            color: white;
+        }
+        
+        .chat-input-container {
+            padding: var(--space-4) var(--space-6);
+            border-top: 1px solid var(--gray-200);
+            background-color: var(--gray-50);
+        }
+        
+        [data-theme="dark"] .chat-input-container {
+            background-color: var(--gray-100);
+        }
+        
+        .chat-input-form {
+            display: flex;
+            gap: var(--space-3);
+        }
+        
+        .chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+        }
+        
+        .chat-suggestion {
+            padding: var(--space-2) var(--space-3);
+            font-size: var(--text-sm);
+            background-color: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .chat-suggestion:hover {
+            background-color: var(--primary-100);
+            border-color: var(--primary-300);
+            color: var(--primary-700);
+        }
+        
+        /* Activity Timeline */
+        .timeline {
+            position: relative;
+            padding-left: var(--space-8);
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--gray-200);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: var(--space-6);
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -23px;
+            width: 12px;
+            height: 12px;
+            border-radius: var(--radius-full);
+            background-color: white;
+            border: 2px solid var(--primary-500);
+        }
+        
+        .timeline-content {
+            background-color: white;
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-fast);
+        }
+        
+        [data-theme="dark"] .timeline-content {
+            background-color: var(--gray-50);
+        }
+        
+        .timeline-content:hover {
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                z-index: 100;
+                box-shadow: var(--shadow-xl);
+            }
+            
+            .sidebar.mobile-open {
+                display: block;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            .mobile-menu-toggle {
+                display: none;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .sidebar,
+            .top-bar,
+            .chat-container,
+            .btn {
+                display: none !important;
+            }
+            
+            .dashboard-layout {
+                display: block;
+            }
+            
+            .content-area {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+            <div class="sidebar-logo">
+                <i class="fas fa-chart-line" style="color: var(--primary-500);"></i>
+                <span>Agentic RevOps</span>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="#overview" class="sidebar-nav-link active" data-tab="overview">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#chat" class="sidebar-nav-link" data-tab="chat">
+                        <i class="fas fa-comments"></i>
+                        <span>AI Assistant</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#analytics" class="sidebar-nav-link" data-tab="analytics">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#campaigns" class="sidebar-nav-link" data-tab="campaigns">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Campaigns</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#content" class="sidebar-nav-link" data-tab="content">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Content</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#integrations" class="sidebar-nav-link" data-tab="integrations">
+                        <i class="fas fa-plug"></i>
+                        <span>Integrations</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#settings" class="sidebar-nav-link" data-tab="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div style="margin-top: auto; padding-top: var(--space-8);">
+                <div style="padding: var(--space-4); background-color: rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); margin-bottom: var(--space-4);">
+                    <p style="font-size: var(--text-sm); color: var(--gray-300); margin-bottom: var(--space-2);">System Status</p>
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--success-500);"></div>
+                        <span style="font-size: var(--text-sm); color: white;">All systems operational</span>
+                    </div>
+                </div>
+                
+                <a href="/clients.html" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Clients
+                </a>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area -->
+        <main class="main-content" id="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <button class="btn btn-ghost btn-icon mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="search" class="form-input" placeholder="Search anything..." aria-label="Search">
+                </div>
+                
+                <div class="user-menu">
+                    <button class="btn btn-ghost btn-icon" onclick="uiComponents.toggleTheme()" aria-label="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    
+                    <button class="btn btn-ghost btn-icon" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge badge-error" style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%);">3</span>
+                    </button>
+                    
+                    <div class="tooltip">
+                        <button class="btn btn-ghost" style="padding: var(--space-2);">
+                            <img src="https://ui-avatars.com/api/?name=John+Doe&background=3b82f6&color=fff" 
+                                 alt="User avatar" 
+                                 style="width: 32px; height: 32px; border-radius: var(--radius-full);">
+                            <span style="margin-left: var(--space-2);">John Doe</span>
+                            <i class="fas fa-chevron-down" style="margin-left: var(--space-2); font-size: var(--text-xs);"></i>
+                        </button>
+                        <div class="tooltip-content">Account settings</div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Client Header -->
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-body">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+                            <div>
+                                <h1 id="clientName" style="margin-bottom: var(--space-2);">Acme Corporation</h1>
+                                <p style="color: var(--gray-600); display: flex; align-items: center; gap: var(--space-4);">
+                                    <span><i class="fas fa-globe"></i> acme.com</span>
+                                    <span><i class="fas fa-calendar"></i> Client since Jan 2024</span>
+                                    <span class="badge badge-success">Active</span>
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: var(--space-3);">
+                                <button class="btn btn-secondary">
+                                    <i class="fas fa-edit"></i>
+                                    Edit Details
+                                </button>
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-rocket"></i>
+                                    Launch Campaign
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content -->
+                <div id="tabContent">
+                    <!-- Overview Tab -->
+                    <div id="overview-content" class="tab-content active">
+                        <!-- Metrics Grid -->
+                        <div class="grid grid-cols-4 md:grid-cols-2 sm:grid-cols-1" style="margin-bottom: var(--space-6);">
+                            <div class="metric-card animate-on-scroll">
+                                <div class="metric-icon" style="background-color: var(--primary-100); color: var(--primary-600);">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="metric-value">$2.5M</div>
+                                <div class="metric-label">Revenue</div>
+                                <div class="metric-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    12.5%
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card animate-on-scroll">
+                                <div class="metric-icon" style="background-color: var(--success-100); color: var(--success-600);">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="metric-value">1,234</div>
+                                <div class="metric-label">Leads Generated</div>
+                                <div class="metric-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    8.3%
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card animate-on-scroll">
+                                <div class="metric-icon" style="background-color: var(--secondary-100); color: var(--secondary-600);">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="metric-value">24.5%</div>
+                                <div class="metric-label">Conversion Rate</div>
+                                <div class="metric-change negative">
+                                    <i class="fas fa-arrow-down"></i>
+                                    2.1%
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card animate-on-scroll">
+                                <div class="metric-icon" style="background-color: var(--warning-100); color: var(--warning-600);">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <div class="metric-value">5</div>
+                                <div class="metric-label">Active Campaigns</div>
+                                <div class="badge badge-primary" style="margin-top: var(--space-2);">Running</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts and Activity -->
+                        <div class="grid grid-cols-2 lg:grid-cols-1" style="gap: var(--space-6);">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Revenue Trend</h3>
+                                    <select class="form-select" style="width: auto;">
+                                        <option>Last 6 months</option>
+                                        <option>Last year</option>
+                                        <option>All time</option>
+                                    </select>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="revenueChart" height="300"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Recent Activity</h3>
+                                    <a href="#" class="btn btn-ghost btn-sm">View All</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="timeline">
+                                        <div class="timeline-item">
+                                            <div class="timeline-marker"></div>
+                                            <div class="timeline-content">
+                                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-2);">
+                                                    <h4 style="font-size: var(--text-base); margin-bottom: 0;">Q2 Marketing Plan Approved</h4>
+                                                    <span style="font-size: var(--text-sm); color: var(--gray-500);">2 hours ago</span>
+                                                </div>
+                                                <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: 0;">
+                                                    AI team generated comprehensive marketing strategy with 15 action items.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="timeline-item">
+                                            <div class="timeline-marker"></div>
+                                            <div class="timeline-content">
+                                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-2);">
+                                                    <h4 style="font-size: var(--text-base); margin-bottom: 0;">SEO Audit Completed</h4>
+                                                    <span style="font-size: var(--text-sm); color: var(--gray-500);">5 hours ago</span>
+                                                </div>
+                                                <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: 0;">
+                                                    Identified 23 optimization opportunities, estimated 40% traffic increase.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="timeline-item">
+                                            <div class="timeline-marker"></div>
+                                            <div class="timeline-content">
+                                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-2);">
+                                                    <h4 style="font-size: var(--text-base); margin-bottom: 0;">Email Campaign Launched</h4>
+                                                    <span style="font-size: var(--text-sm); color: var(--gray-500);">Yesterday</span>
+                                                </div>
+                                                <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: 0;">
+                                                    Sent to 5,000 subscribers with personalized content. 32% open rate so far.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Chat Tab -->
+                    <div id="chat-content" class="tab-content" style="display: none;">
+                        <div class="chat-container">
+                            <div class="chat-header">
+                                <h3 style="margin-bottom: var(--space-1);">AI RevOps Assistant</h3>
+                                <p style="font-size: var(--text-sm); color: var(--gray-600); margin-bottom: 0;">
+                                    Powered by specialized AI agents for marketing, sales, and analytics
+                                </p>
+                            </div>
+                            
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="chat-message">
+                                    <div class="chat-avatar" style="background-color: var(--primary-100); color: var(--primary-600);">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <div class="chat-bubble">
+                                        <p style="margin-bottom: 0;">Hello! I'm your AI RevOps assistant. I can help you with:</p>
+                                        <ul style="margin-top: var(--space-2); margin-bottom: 0; padding-left: var(--space-4);">
+                                            <li>Marketing strategy and campaign planning</li>
+                                            <li>Sales pipeline optimization</li>
+                                            <li>Customer analytics and insights</li>
+                                            <li>Content generation and SEO</li>
+                                        </ul>
+                                        <p style="margin-top: var(--space-2); margin-bottom: 0;">What would you like to work on today?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-input-container">
+                                <form class="chat-input-form" id="chatForm">
+                                    <input type="text" 
+                                           class="form-input" 
+                                           id="chatInput" 
+                                           placeholder="Ask me anything about revenue operations..."
+                                           aria-label="Chat message">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Send
+                                    </button>
+                                </form>
+                                
+                                <div class="chat-suggestions">
+                                    <button type="button" class="chat-suggestion" onclick="sendSuggestion(this)">
+                                        Create Q3 marketing plan
+                                    </button>
+                                    <button type="button" class="chat-suggestion" onclick="sendSuggestion(this)">
+                                        Analyze competitor landscape
+                                    </button>
+                                    <button type="button" class="chat-suggestion" onclick="sendSuggestion(this)">
+                                        Optimize conversion funnel
+                                    </button>
+                                    <button type="button" class="chat-suggestion" onclick="sendSuggestion(this)">
+                                        Generate SEO content ideas
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Other tabs would go here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../js/ui-components.js"></script>
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab navigation
+            const tabLinks = document.querySelectorAll('.sidebar-nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = link.dataset.tab;
+                    
+                    // Update active states
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.style.display = content.id === `${tabId}-content` ? 'block' : 'none';
+                    });
+                    
+                    // Update URL without reload
+                    history.pushState(null, '', `#${tabId}`);
+                });
+            });
+            
+            // Initialize chart
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [180000, 195000, 210000, 225000, 240000, 250000],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Chat functionality
+            const chatForm = document.getElementById('chatForm');
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+            
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const message = chatInput.value.trim();
+                if (message) {
+                    addChatMessage(message, 'user');
+                    chatInput.value = '';
+                    
+                    // Simulate AI response
+                    setTimeout(() => {
+                        const response = generateAIResponse(message);
+                        addChatMessage(response, 'ai');
+                    }, 1000);
+                }
+            });
+            
+            function addChatMessage(message, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${sender === 'user' ? 'user' : ''}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'chat-avatar';
+                
+                if (sender === 'user') {
+                    avatar.style.backgroundColor = 'var(--gray-200)';
+                    avatar.innerHTML = '<i class="fas fa-user"></i>';
+                } else {
+                    avatar.style.backgroundColor = 'var(--primary-100)';
+                    avatar.style.color = 'var(--primary-600)';
+                    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                }
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble';
+                bubble.innerHTML = `<p style="margin-bottom: 0;">${message}</p>`;
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(bubble);
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function generateAIResponse(message) {
+                const responses = {
+                    'marketing plan': 'I\'ll help you create a comprehensive marketing plan. Based on your current metrics, I recommend focusing on content marketing and paid social campaigns. Would you like me to generate a detailed strategy document?',
+                    'competitor': 'I\'ve analyzed your top 5 competitors. Your main advantages are superior customer service and faster implementation times. However, competitors have stronger SEO presence. Shall I create a competitive analysis report?',
+                    'conversion': 'Your current conversion rate of 24.5% is above industry average. I\'ve identified 3 key areas for improvement: mobile optimization, checkout simplification, and personalized recommendations.',
+                    'seo': 'Based on recent analysis, here are top SEO opportunities: 1) Optimize for 15 high-value keywords, 2) Improve page load speed by 40%, 3) Create topic clusters for better content organization.'
+                };
+                
+                const lowercaseMessage = message.toLowerCase();
+                for (const [key, response] of Object.entries(responses)) {
+                    if (lowercaseMessage.includes(key)) {
+                        return response;
+                    }
+                }
+                
+                return 'I understand your request. Let me analyze this and provide recommendations. Our specialized agents are working on generating insights for you.';
+            }
+        });
+        
+        // Suggestion buttons
+        function sendSuggestion(button) {
+            const chatInput = document.getElementById('chatInput');
+            chatInput.value = button.textContent.trim();
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+        
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    </script>
+</body>
+</html>
